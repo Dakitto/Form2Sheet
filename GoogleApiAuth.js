@@ -69,7 +69,7 @@ async function authorize() {
  * Prints the names and majors of students in a sample spreadsheet:
  * @see https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit#gid=0
  * @param {google.auth.OAuth2} auth The authenticated Google OAuth client.
- */
+ */ /*
 async function listMajors(auth) {
   const sheets = google.sheets({version: 'v4', auth});
   const res = await sheets.spreadsheets.values.append({
@@ -78,7 +78,7 @@ async function listMajors(auth) {
     valueInputOption: 'RAW',
     resource: {values:[['JIJIJI','Jeffer']]}
   });
-  /*const rows = res.data.values;
+  const rows = res.data.values;
   if (!rows || rows.length === 0) {
     console.log('No data found.');
     return;
@@ -88,7 +88,7 @@ async function listMajors(auth) {
     // Print columns A and E, which correspond to indices 0 and 4.
     console.log(`${row.toString()}`);
   });
-  */
 }
+  */
 
-authorize().then(listMajors).catch(console.error);
+module.exports.GoogleSheets = authorize()
