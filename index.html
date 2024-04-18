@@ -47,6 +47,8 @@
     
     <div class="container">
       <h1 class="title">Desayuno Feliz</h1>
+      
+
       <form id="hacerpedidos"> <label for="name">Nombre:</label>
               <input type="text" id="name" name="name" list="listaValoresUnicos" required>
               <datalist id="listaValoresUnicos">
@@ -55,7 +57,10 @@
               <label for="order">Cuantos?:</label>
               <input type="number" id="order" name="number" required> 
               <button type="submit">Agregar Pedido</button> </form>
-    </div>
+              <p style="text-align: center;">
+                <a target="_blank" href="https://docs.google.com/spreadsheets/d/1CS0WzbxJRO71wifLhzr2OsHw-rKjs_cHREsLQupMQy0/edit#gid=0">Ver Hoja en Google Sheets</a>
+              </p>
+            </div>
     <script type="text/javascript">
       try{
         let t = fetch('https://peapix.com/bing/feed', {method:'get'})
