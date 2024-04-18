@@ -1,28 +1,80 @@
+
 <!DOCTYPE html>
 <html>
   <head>
     <title>Sheets API Quickstart</title>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   </head>
   <body>
-    <p>Sheets API Quickstart</p>
+    <style> body { background-size: cover !important;display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Arial, sans-serif; background-color: #f0f0f0; }
+      .container { backdrop-filter: blur(10px); background-blend-mode: blur(0.5px); margin: 10px;background-color: rgba(255, 255, 255, 0.8); padding: 30px; border-radius: 5px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); }
+      
+      .title { text-align: center; margin-bottom: 30px; color: #333; text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2); }
+      
+      label { display: block; margin-bottom: 5px; color: #333; }
+      
+      #hacerpedidos input, input[type="text"], input[type="email"], input[type="password"] { width: 100%; padding: 10px; border: none; border-radius: 5px; background-color: rgba(255, 255, 255, 0.8); box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2); margin-bottom: 20px; transition: all 0.3s ease-in-out; }
+      
+      #hacerpedidos input, input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus { box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.4); }
+      
+      button { width: 100%; padding: 10px; border: none; border-radius: 5px; background-color: #4CAF50; color: #fff; font-weight: bold; cursor: pointer; transition: all 0.3s ease-in-out; }
+      
+      button:hover { background-color: #3e8e41; } 
+      button#signout_button{
+        visibility: visible;
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        width: 50px;
+        background: red;
+      }
+      tr td:first-child {
+          text-transform: capitalize;
+      }
+      </style>
+    <div class="container">
+    <h1 class="title">Oauth, with <br> Google Sheet API</h1>
 
-    <!--Add buttons to initiate auth sequence and sign out-->
     <button id="authorize_button" onclick="handleAuthClick()">Authorize</button>
     <button id="signout_button" onclick="handleSignoutClick()">Sign Out</button>
 
     <pre id="content" style="white-space: pre-wrap;"></pre>
-    <div>
-      <h1>Formulario para pedidos</h1>
-      <form></form>
+
     </div>
-  
+    <!--Add buttons to initiate auth sequence and sign out-->
+    
+    <div class="container">
+      <h1 class="title">Desayuno Feliz</h1>
+      <form id="hacerpedidos"> <label for="name">Nombre:</label>
+              <input type="text" id="name" name="name" list="listaValoresUnicos" required>
+              <datalist id="listaValoresUnicos">
+                <!-- Agrega más opciones según sea necesario -->
+              </datalist>
+              <label for="order">Cuantos?:</label>
+              <input type="number" id="order" name="number" required> 
+              <button type="submit">Agregar Pedido</button> </form>
+    </div>
     <script type="text/javascript">
+      try{
+        let t = fetch('https://peapix.com/bing/feed', {method:'get'})
+                .then(response => response.json())
+                .then((data) => {
+                  document.getElementsByTagName('body')[0].style.background = `url(${data[obtenerNumeroAleatorio(data.length)].fullUrl})`
+                });
+      }catch(e){
+        console.error(e);
+      }
+      function obtenerNumeroAleatorio(longitudArray) {
+        return Math.floor(Math.random() * longitudArray);
+      }
+      
       /* exported gapiLoaded */
       /* exported gisLoaded */
       /* exported handleAuthClick */
       /* exported handleSignoutClick */
-
+      
       // TODO(developer): Set to client ID and API key from the Developer Console
       const CLIENT_ID = '1009226355346-10gij0cavujltparn257ncdjk1cchesg.apps.googleusercontent.com';
       const API_KEY = 'AIzaSyDk9YLfLgtnWj5Dhd0RQ5HcMQzjL9cwCas';
@@ -82,6 +134,35 @@
           document.getElementById('authorize_button').style.visibility = 'visible';
         }
       }
+      function toLetter(number){
+        let letters = {
+          0:'A',1:'B',2:'C',3:'D',4:'E',
+          5:'F',6:'G',7:'H',8:'I',9:'J'
+        }
+        return letters[number]
+      }
+     async function cambioPedido(e){
+    let id = e.id.split('-');
+    if(id[2] == 1)
+    { 
+       console.log('input-'+id[1]+'-2','input-'+id[1]+'-3'); document.getElementById('input-'+id[1]+'-2').max = e.value.toString();
+        document.getElementById('input-'+id[1]+'-3').max = e.value.toString()
+    } 
+    try  {
+         // Fetch first 10 files
+         response = await gapi.client.sheets.spreadsheets.values.update({
+           spreadsheetId: '1CS0WzbxJRO71wifLhzr2OsHw-rKjs_cHREsLQupMQy0',
+           range: `Sheet1!${toLetter(id[2])}${(Number(id[1])+1).toString()}`,
+           values: [[e.value.toString()]],
+           valueInputOption:'USER_ENTERED'
+         });
+       } catch (err) {
+         document.getElementById('content').innerText = err.message;
+         console.log(err)
+         return;
+       } 
+        
+    }
 
       /**
        *  Sign in the user upon button click.
@@ -93,6 +174,7 @@
           }
           document.getElementById('signout_button').style.visibility = 'visible';
           document.getElementById('authorize_button').innerText = 'Refresh';
+          document.cookie = "mytokeninseguro="+gapi.client.getToken()+"; expires=6000; path=/";
           await listMajors();
         };
 
@@ -124,9 +206,46 @@
        * Print the names and majors of students in a sample spreadsheet:
        * https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
        */
+      var range;
+      var valoresUnicos = new Set();
+      var valoresLista = new Set();
+      document.getElementById('hacerpedidos').addEventListener('submit', async function(e){
+        e.preventDefault();
+        let form = document.getElementById('hacerpedidos');
+        let name = form.name.value.trim().toLowerCase();
+        let number= form.number.value.trim().toLowerCase();
+        let dateorder = new Date()
+        let day =  ("0" + dateorder.getDate()).slice(-2);
+        let month = ("0"+(dateorder.getMonth()+1)).slice(-2);
+        let year = dateorder.getFullYear();
+        let  orderid = `${day}-${month}-${year}`;
+
+        if(valoresLista.has(name)) return alert("Ya se ha enviado un pedido con este nombre \n Por Favor usa la Lista")
+        else {
+          try  {
+         // Fetch first 10 files
+         response = await gapi.client.sheets.spreadsheets.values.append({
+           spreadsheetId: '1CS0WzbxJRO71wifLhzr2OsHw-rKjs_cHREsLQupMQy0',
+           range: 'Sheet1!A:E',
+           values: [[name,number,0,0,orderid]],
+           valueInputOption:'USER_ENTERED',
+         });
+         if(response.status=== 200){
+            alert(`Pedido realizado con exito`);
+            listMajors()
+         }
+          } catch (err) {
+            alert('Hubo un Error al intentar enviar el pedido')
+            console.log(err)
+            return;
+       } 
+        }
+      })
       async function listMajors() {
         let response;
         try {
+         
+
           // Fetch first 10 files
           response = await gapi.client.sheets.spreadsheets.values.get({
             spreadsheetId: '1CS0WzbxJRO71wifLhzr2OsHw-rKjs_cHREsLQupMQy0',
@@ -136,31 +255,57 @@
           document.getElementById('content').innerText = err.message;
           return;
         }
-        const range = response.result;
+        range = response.result;
         if (!range || !range.values || range.values.length == 0) {
           document.getElementById('content').innerText = 'No values found.';
           return;
         }
+        var hoy = new Date();
+        hoy.setHours(0, 0, 0, 0)
         // Flatten to string to display
         const output = range.values.reduce(
             (str, row, index) => {
-              let rowHTML = index === 0 ? '<table><thead><tr>' : '<tr>';
+              var rowHTML = ''
+              var fechaEntrega = row[4].split('/');
+              fechaEntrega = `${fechaEntrega[1]}/${fechaEntrega[0]}/${fechaEntrega[2]}`;
+              fechaEntrega = new Date(fechaEntrega);
+
+              console.log(row[1] !== row[3], hoy.getTime(), fechaEntrega.getTime())
+              if( index > 0 ) valoresUnicos.add(row[0].trim());
+
+              if(index == 0 || row[1] !== row[3] || hoy.getTime() == fechaEntrega.getTime()){
+                if( index > 0 ) valoresLista.add(row[0]);
+
+
+                rowHTML = index === 0 ? '<table><thead><tr>' : '<tr>';
   
             // Agregar las celdas a la fila
-            rowHTML += row.reduce((rowAcc, cell) => {
+            rowHTML += row.reduce((rowAcc, cell, indexito) => {
               // Si es la primera fila, usar th, de lo contrario, td
-              return rowAcc + (index === 0 ? `<th>${cell}</th>` : `<td>${cell}</td>`);
+              return rowAcc + (index === 0 ? `<th>${cell}</th>` : `<td>${indexito > 0 && indexito < 4 ? '<input oninput="cambioPedido(this)" id="input-'+index+'-'+indexito+'" min="0" max="'+ ((indexito > 1 && indexito < 4) ? row[1] : '') + '" class="listinput'+(indexito == 1 ? ' inputPedido' : '') + '" type="number" value="'+cell+'"></input>': cell}</td>`);
             }, '');
 
             // Cerrar la fila y, si es la primera, también cerrar the thead
             rowHTML += index === 0 ? '</tr></thead><tbody>' : '</tr>';
 
+            
             // Agregar la fila al HTML acumulado
+            }
+
             return str + rowHTML;
             } ,'');
-
-
+        console.log(output)
         document.getElementById('content').innerHTML = output;
+        
+         // AgoAgora
+          // Tus valores únicos
+          const dataList = document.getElementById('listaValoresUnicos');
+
+          valoresUnicos.forEach(valor => {
+            const option = document.createElement('option');
+            option.value = valor;
+            dataList.appendChild(option);
+          });
       }
     </script>
     <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
