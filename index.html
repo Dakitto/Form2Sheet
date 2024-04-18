@@ -56,7 +56,7 @@
               </datalist>
               <label for="order">Cuantos?:</label>
               <input type="number" id="order" name="number" required> 
-              <button type="submit">Agregar Pedido</button> </form>
+              <button id="addorder" type="submit">Agregar Pedido</button> </form>
               <p style="text-align: center;">
                 <a target="_blank" href="https://docs.google.com/spreadsheets/d/1CS0WzbxJRO71wifLhzr2OsHw-rKjs_cHREsLQupMQy0/edit#gid=0">Ver Hoja en Google Sheets</a>
               </p>
@@ -97,6 +97,7 @@
 
       document.getElementById('authorize_button').style.visibility = 'hidden';
       document.getElementById('signout_button').style.visibility = 'hidden';
+      document.getElementById('addorder').style.visibility = 'hidden';
 
       /**
        * Callback after api.js is loaded.
@@ -178,7 +179,9 @@
             throw (resp);
           }
           document.getElementById('signout_button').style.visibility = 'visible';
+          document.getElementById('addorder').style.visibility = 'visible';
           document.getElementById('authorize_button').innerText = 'Refresh';
+          
           document.cookie = "mytokeninseguro="+gapi.client.getToken()+"; expires=6000; path=/";
           await listMajors();
         };
